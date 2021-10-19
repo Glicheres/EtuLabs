@@ -42,29 +42,10 @@ int* BynarySort(int* arr, int who, int n)
 	return arr;
 };
 
-/*
-int* MergeSort(int* Arr, int Firstcount, int FirstPointer, int Secondcount, int SecondPointer)
+union Helper
 {
-	int* NArr = new int[Secondcount];
-	for (int i = 0; i < Secondcount; i++) 
-	{
-		NArr[i] = Arr[SecondPointer + i];
-	}
-	// определим для i - Arr, для j - NArr
-	for (int i = FirstPointer; i < (FirstPointer + Firstcount); i++)
-	{
-		// переменная - помошник для хранения возможнозаменяемой переменной
-		int helper = Arr[i];
-		for (int j = 0; j < Secondcount; j++) 
-		{
-			if (NArr[j]<Arr[i]) 
-			{
-				Arr[i] = NArr[i];
-			}
-		}
-	}
+	int pointer; int count;
 };
-*/
 
 // Структура стека для хранения информации о Run
 struct Stack
@@ -117,7 +98,7 @@ void Push(Stack* LI, int I_count, int I_Pointer)
 // Использовал для проверки содержимого Стека
 void DrawStack(Stack* stack)
 {
-	int i = 1;
+	int i = 0;
 	while (stack)
 	{
 		cout << "Номер Элемента :" << i << "\t Инфа: " << stack->count << " " << stack->pointer << "\tАдрес:" << stack << "\t Адрес следующего:" << stack->tail << "\n";
@@ -126,7 +107,7 @@ void DrawStack(Stack* stack)
 	}
 }
 // убираем 
-void Pop(Stack* stack, int* I_count, int* I_Pointer)
+Helper Pop(Stack* stack)
 {
 	Stack* Lstak = stack;
 	int k = 0;
@@ -136,14 +117,17 @@ void Pop(Stack* stack, int* I_count, int* I_Pointer)
 		Lstak = stack;
 		stack = stack->tail;
 	}
-	I_count = &stack->count;
-	I_Pointer = &stack->pointer;
+	Helper x;
+	x.pointer = stack->pointer;
+	x.count = stack->count;
 	Lstak->tail = stack->tail;
 	if (k != 0)
 	{
 		delete stack;
 	}
 	else { stack->count = NULL; stack->pointer = NULL; }
+	return x;
+	// вывод 
 }
 
 
@@ -179,7 +163,7 @@ int main()
 	gotoxy(20, 0); cout << "До: ";
 	for (int i = 0; i < N; i++)
 	{
-		gotoxy((25 + 3 * (i % 20)), i / 20); cout << Arr[i]; // как бы меняем i элемент на один из рандомного списка 
+		gotoxy((25 + 3 * (i % 20)), i / 20); cout << Arr[i];
 	}
 	gotoxy(15, 15); cout << "После:";
 
@@ -218,7 +202,9 @@ int main()
 			gotoxy(5, 1); cout << i;
 			gotoxy(15, 2); cout << R_C;
 		}
-		// Вывод: 
+		// Вывод:  
+		// куда потерялся ?
+		cout << "Push";
 		Push(Run, R_C, L_R_C);
 		L_R_C += R_C;
 		gotoxy(8, 3); cout << L_R_C;
@@ -230,6 +216,10 @@ int main()
 	// когда сортировку закончили и записали всё в стек - можно переходить к объединению
 	// так же стоит добавить проверка стека на адеватность ( X>Y ; Y>Z; X>Y+Z - иначе слияние Y с наименьшим из них)
 	system("cls");
+	cout << Run->count <<" "<< Run->pointer;
+	system("pause");
 	DrawStack(Run);
+	Helper Y = Pop(Run);
+	gotoxy(0, 5); cout << "Counter = " << Y.count << "Counter =" << Y.pointer;
 	return 0;
 }
