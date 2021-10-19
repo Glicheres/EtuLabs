@@ -77,7 +77,7 @@ Stack* CreateStack()
 // добавляем  - Run, длинна, место в массиве
 void Push(Stack* LI, int I_count, int I_Pointer)
 {
-	if (LI->count == NULL || LI->pointer == NULL)
+	if (LI->count == NULL)
 	{
 		LI->count = I_count;
 		LI->pointer = I_Pointer;
@@ -204,7 +204,6 @@ int main()
 		}
 		// Вывод:  
 		// куда потерялся ?
-		cout << "Push";
 		Push(Run, R_C, L_R_C);
 		L_R_C += R_C;
 		gotoxy(8, 3); cout << L_R_C;
@@ -218,8 +217,6 @@ int main()
 	system("cls");
 	cout << Run->count <<" "<< Run->pointer;
 	system("pause");
-	DrawStack(Run);
-	Helper Y = Pop(Run);
-	gotoxy(0, 5); cout << "Counter = " << Y.count << "Counter =" << Y.pointer;
+	DrawStack(Run); 
 	return 0;
 }
