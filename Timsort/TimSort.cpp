@@ -10,7 +10,7 @@ void gotoxy(int xpos, int ypos)
 	HANDLE hOuput = GetStdHandle(STD_OUTPUT_HANDLE);
 	scrn.X = xpos; scrn.Y = ypos;
 	SetConsoleCursorPosition(hOuput, scrn);
-}
+};
 
 // Функция была честно стрельнута с интернета для оперативного вычисления с помощью волшебной математики MinRunов
 int GetMinrun(int n)
@@ -21,7 +21,7 @@ int GetMinrun(int n)
 		n >>= 1;
 	}
 	return n + r;
-}
+};
 
 // Сортировка вставками (ну или сортировка бинарным поиском ) - быстрая по коротким дистанциям 
 // n - длинна, who(кто?) - окуда начинается сортировка
@@ -40,7 +40,31 @@ int* BynarySort(int* arr, int who, int n)
 		}
 	}
 	return arr;
-}
+};
+
+/*
+int* MergeSort(int* Arr, int Firstcount, int FirstPointer, int Secondcount, int SecondPointer)
+{
+	int* NArr = new int[Secondcount];
+	for (int i = 0; i < Secondcount; i++) 
+	{
+		NArr[i] = Arr[SecondPointer + i];
+	}
+	// определим для i - Arr, для j - NArr
+	for (int i = FirstPointer; i < (FirstPointer + Firstcount); i++)
+	{
+		// переменная - помошник для хранения возможнозаменяемой переменной
+		int helper = Arr[i];
+		for (int j = 0; j < Secondcount; j++) 
+		{
+			if (NArr[j]<Arr[i]) 
+			{
+				Arr[i] = NArr[i];
+			}
+		}
+	}
+};
+*/
 
 // Структура стека для хранения информации о Run
 struct Stack
@@ -81,8 +105,8 @@ void Push(Stack* LI, int I_count, int I_Pointer)
 	{
 		Stack* stack = new Stack;
 		stack->tail = 0;
-		LI->count = I_count;
-		LI->pointer = I_Pointer;
+		stack->count = I_count;
+		stack->pointer = I_Pointer;
 		while (LI->tail != 0)
 		{
 			LI = LI->tail;
@@ -139,7 +163,7 @@ int main()
 		}
 		else Arr[i] = i % 10;
 	}
-	// перемешиваю его ( чтобы было что сортировать :3)
+	// перемешиваю его ( чтобы было что сортировать )
 	for (int i = 0; i < N; i++)
 	{
 		swap(Arr[i], Arr[rand() % (i - N)]); // как бы меняем i элемент на один из рандомного списка 
@@ -151,6 +175,7 @@ int main()
 	gotoxy(0, 1); cout << "I = ";
 	gotoxy(0, 2); cout << "Размер тек.run = ";
 	gotoxy(0, 3); cout << "L_R_C = ";
+	gotoxy(0, 4); cout << "№ Run = ";
 	gotoxy(20, 0); cout << "До: ";
 	for (int i = 0; i < N; i++)
 	{
@@ -166,35 +191,45 @@ int main()
 	int R_C = 2; // c 0 начинаем же 
 	// last Run Counter - фактический указатель на конец предыдущего 
 	int L_R_C = 0;
+	// номер run
+	int NRun = 0;
 	while (i < N)
 	{
-		// чистим, чистим, чистим, чистим 
-		for (int j = 0; j < N; j++)
-		{
-			gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << "  ";
-		}
 		// пока под i элемент > чем предыдущий или не достигнут minrun
 		while ((Arr[i - 1] <= Arr[i] || (R_C < minrun))&&(i<N))
 		{
+			// чистим, чистим 
+			for (int j = L_R_C; j < i+1; j++)
+			{
+				gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << "  ";
+			}
 			// если элемент меньше чем предыдущий - используем сортировку
 			if (Arr[i - 1] > Arr[i])
 			{
 				Arr = BynarySort(Arr,L_R_C,i + 1);
 			}
+			// выводим (ля, красиво)
+			for (int j = L_R_C; j < i + 1; j++)
+			{
+				gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << Arr[j];
+			}
 			R_C++;
 			i++; // в конце переходит на сл.элемент 
 			gotoxy(5, 1); cout << i;
 			gotoxy(15, 2); cout << R_C;
-			gotoxy(8, 3); cout << L_R_C;
 		}
 		// Вывод: 
-		for (int j = 0; j < N; j++)
-		{
-			gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << Arr[j];
-		}
+		Push(Run, R_C, L_R_C);
 		L_R_C += R_C;
+		gotoxy(8, 3); cout << L_R_C;
 		R_C = 0;
+		NRun++;
+		gotoxy(8, 4); cout << NRun;
 		gotoxy(0, 28); system("pause");
 	}
+	// когда сортировку закончили и записали всё в стек - можно переходить к объединению
+	// так же стоит добавить проверка стека на адеватность ( X>Y ; Y>Z; X>Y+Z - иначе слияние Y с наименьшим из них)
+	system("cls");
+	DrawStack(Run);
 	return 0;
 }
