@@ -2,7 +2,6 @@
 #include <windows.h>
 using namespace std;
 
-
 // НУ мы же все тут любим крассивый интерфейс ?
 void gotoxy(int xpos, int ypos)
 {
@@ -42,10 +41,27 @@ int* BynarySort(int* arr, int who, int n)
 	return arr;
 };
 
-union Helper
+// ну она реально помогает работать одной функции.... в перспективе будет помогать всем. А потом всему миру.
+struct Helper
 {
 	int pointer; int count;
 };
+
+// ну ради проверки чиста
+int* MergeSort(int* Arr, Helper First, Helper Second)
+{
+	for (int i = 0; i < Second.count; i++)
+	{
+		Arr[i + Second.pointer] = 0;
+	}
+	for (int i = 0; i < First.count; i++)
+	{
+		Arr[i + First.pointer] = 0;
+	}
+	return Arr;
+};
+
+
 
 // Структура стека для хранения информации о Run
 struct Stack
@@ -55,7 +71,7 @@ struct Stack
 	Stack* tail;  // адрес следующего
 };
 //длинна ?
-unsigned LengthList(Stack* beg)
+unsigned LengthStack(Stack* beg)
 {
 	unsigned length = 0;   //  Счетчик элементов списка
 	while (beg)
@@ -95,40 +111,71 @@ void Push(Stack* LI, int I_count, int I_Pointer)
 		LI->tail = stack;
 	}
 }
+
 // Использовал для проверки содержимого Стека
 void DrawStack(Stack* stack)
 {
 	int i = 0;
 	while (stack)
 	{
-		cout << "Номер Элемента :" << i << "\t Инфа: " << stack->count << " " << stack->pointer << "\tАдрес:" << stack << "\t Адрес следующего:" << stack->tail << "\n";
+		cout << "Номер Элемента :" << i << "\t Начало с : " << stack->pointer << "\tДлинна:" << stack->count << "  Адрес:" << stack << "   Адрес следующего:" << stack->tail << "\n";
 		stack = stack->tail;
 		i++;
 	}
 }
-// убираем 
+
+// выводим элемент по правилам стека
 Helper Pop(Stack* stack)
 {
-	Stack* Lstak = stack;
-	int k = 0;
-	while (stack->tail != 0)
+	Helper X;
+	if (LengthStack(stack) > 1)
 	{
-		k++;
-		Lstak = stack;
-		stack = stack->tail;
-	}
-	Helper x;
-	x.pointer = stack->pointer;
-	x.count = stack->count;
-	Lstak->tail = stack->tail;
-	if (k != 0)
-	{
+		Stack* AfterEl = stack; // элемент что был до этого
+		while (stack->tail != 0)
+		{
+			AfterEl = stack;
+			stack = stack->tail;
+		}
+		AfterEl->tail = stack->tail;
+		X.count = stack->count;
+		X.pointer = stack->pointer;
 		delete stack;
 	}
-	else { stack->count = NULL; stack->pointer = NULL; }
-	return x;
+	else
+	{
+		int x, y;
+		x = stack->count; y = stack->pointer;;
+		X.count = x;
+		X.pointer = y;
+		stack->count = NULL;
+		stack->pointer = NULL;
+	}
 	// вывод 
+	return X;
+};
+
+void Draww_Arr(int* Arr,int start,int end) 
+{
+	for (int j = start; j < end; j++)
+	{
+		gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << "  ";
+	}
+	for (int j = start; j < end ; j++)
+	{
+		gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << Arr[j];
+	}
 }
+
+// выводит адрес конкретного элемента стека
+Stack* GetStackItem(Stack* beg, unsigned index, bool errMsg = true)
+{
+	//  Цикл заканчивается, когда 
+	while (beg && (index--))
+		beg = beg->tail; //доступ к памяти элемента
+	if (errMsg && !beg)
+		cout << "Элемент списка отсутствует \n";
+	return beg;
+};
 
 
 int main()
@@ -137,7 +184,7 @@ int main()
 	int N; cout << "Введите размер массива: = ";  cin >> N;
 	system("cls");
 	Stack* Run = CreateStack();
-	int* Arr = new int[N];
+	int* Arr = new int[N]; // массив для сортировки 
 	// создаю массив с элементами от 0 до 100 ( ну можно и без них, но мы же всётаки хотим красивую сортировку.... да? )
 	for (int i = 0; i < N; i++)
 	{
@@ -211,12 +258,44 @@ int main()
 		NRun++;
 		gotoxy(8, 4); cout << NRun;
 		gotoxy(0, 28); system("pause");
+
+
+		// тут будет супер странная и неудобная конструкция с "if", но помоему, без неё никак
+		//когда 2 и больше Run уже в стеке - проверяем их на адекватность ( X>Y ; Y>Z; X>Y+Z - иначе слияние Y с наименьшим из них)
+		if (LengthStack(Run) == 2 && Run->count <= Run->tail->count) 
+		{
+			Helper Z, Y;
+			Z = Pop(Run); // создаём доп переменнные типа HElPER для удобного перемещения в функцию
+			cout << "\n";
+			Y = Pop(Run);
+			Arr = MergeSort(Arr, Z, Y); // совмещаем их
+			Draww_Arr(Arr, Y.pointer, Y.count + Z.count);
+		}
+		else // иначе или соединяем их, или у нас остался 1 элемент стека( по факту это должен быть элемент обозначающий весь массив Arr)
+		{
+			if (LengthStack(Run) > 2)
+			{
+				int GLOPI = 0; // General Lenght OF Previus Items - общая длинна предыдущих Run 
+				for (int k = LengthStack(Run); k>0; k--)
+				{
+					Stack* Item = GetStackItem(Run, k); // проверяем каждый элемент уже созданного стека так, чтобы: X>Y ; Y>Z; X>Y+Z, где X - первый добавленный элемент
+					if (Item->count > GLOPI) 
+					{
+						GLOPI += Item->count;
+					}
+					else  // иначе сливаем 2 полседних элемента друг с другом 
+					{
+						Helper X = Pop(Run); // создаём доп переменнные типа HElPER для удобного перемещения в функцию
+						Helper Y = Pop(Run);
+						Arr = MergeSort(Arr, Y, X); // совмещаем их
+						Push(Run, Y.count + X.count, Y.pointer);
+						Draww_Arr(Arr, Y.pointer, Y.count + X.count);
+						break;
+					}
+				}
+			}
+		}
 	}
-	// когда сортировку закончили и записали всё в стек - можно переходить к объединению
-	// так же стоит добавить проверка стека на адеватность ( X>Y ; Y>Z; X>Y+Z - иначе слияние Y с наименьшим из них)
-	system("cls");
-	cout << Run->count <<" "<< Run->pointer;
-	system("pause");
-	DrawStack(Run); 
+	gotoxy(0, 27);
 	return 0;
 }
