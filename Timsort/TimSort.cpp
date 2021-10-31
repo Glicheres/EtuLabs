@@ -47,7 +47,7 @@ struct Helper
 	int pointer; int count;
 };
 
-// ну ради проверки чиста
+// нормально merge-ит
 int* MergeSort(int* Arr, Helper First, Helper Second)
 {
 	/*cout << "Merge go";
@@ -108,6 +108,7 @@ struct Stack
 	int count; // длинна 
 	Stack* tail;  // адрес следующего
 };
+
 //длинна ?
 unsigned LengthStack(Stack* beg)
 {
@@ -119,6 +120,7 @@ unsigned LengthStack(Stack* beg)
 	}
 	return length;
 }
+
 // конструктор ?
 Stack* CreateStack()
 {
@@ -128,6 +130,7 @@ Stack* CreateStack()
 	stack->pointer = NULL;
 	return stack;
 }
+
 // добавляем  - Run, длинна, место в массиве
 void Push(Stack* LI, int I_count, int I_Pointer)
 {
@@ -216,6 +219,21 @@ Stack* GetStackItem(Stack* beg, unsigned index, bool errMsg = true)
 };
 
 
+Stack* StackItem(Stack* beg, unsigned index, bool errMsg = true)
+{
+	//  Цикл заканчивается, когда 
+	while (beg && (index--)) 
+	{
+		beg = beg->tail; //доступ к памяти элемента
+	}
+	if (errMsg && !beg) 
+	{
+		cout << "Элемент отсутствует \n";
+	}
+	return beg;
+}
+
+
 int main()
 {
 	setlocale(0, "");
@@ -262,44 +280,50 @@ int main()
 	int L_R_C = 0;
 	// номер run
 	int NRun = 0;
-	while (i < N)
-	{
-		// пока под i элемент > чем предыдущий или не достигнут minrun
-		while ((Arr[i - 1] <= Arr[i] || (R_C < minrun))&&(i<N))
-		{
-			// чистим, чистим 
-			for (int j = L_R_C; j < i+1; j++)
-			{
-				gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << "  ";
-			}
-			// если элемент меньше чем предыдущий - используем сортировку
-			if (Arr[i - 1] > Arr[i])
-			{
-				Arr = BynarySort(Arr,L_R_C,i + 1);
-			}
-			// выводим (ля, красиво)
-			for (int j = L_R_C; j < i + 1; j++)
-			{
-				gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << Arr[j];
-			}
-			R_C++;
-			i++; // в конце переходит на сл.элемент 
-			gotoxy(5, 1); cout << i;
-			gotoxy(15, 2); cout << R_C;
-		}
-		// Вывод:  
-		// куда потерялся ?
-		Push(Run, R_C, L_R_C);
-		L_R_C += R_C;
-		gotoxy(8, 3); cout << L_R_C;
-		R_C = 0;
-		NRun++;
-		gotoxy(8, 4); cout << NRun;
-		gotoxy(0, 28); system("pause");
+	// останавливает цикл когда остаётся один Run 
+	bool Stop = 0;
 
+	while (i < N || Stop == 0)
+	{
+		// чисто для того чтоб ошибок не было с доп заходом в цикл когда  i = N уже
+		if (i != N) 
+		{
+			// пока под i элемент > чем предыдущий или не достигнут minrun
+			while ((Arr[i - 1] <= Arr[i] || (R_C < minrun)) && (i < N))
+			{
+				// чистим, чистим 
+				for (int j = L_R_C; j < i + 1; j++)
+				{
+					gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << "  ";
+				}
+				// если элемент меньше чем предыдущий - используем сортировку
+				if (Arr[i - 1] > Arr[i])
+				{
+					Arr = BynarySort(Arr, L_R_C, i + 1);
+				}
+				// выводим (ля, красиво)
+				for (int j = L_R_C; j < i + 1; j++)
+				{
+					gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << Arr[j];
+				}
+				R_C++;
+				i++; // в конце переходит на сл.элемент 
+				gotoxy(5, 1); cout << i;
+				gotoxy(15, 2); cout << R_C;
+			}
+			// Вывод:  
+			// куда потерялся ?
+			Push(Run, R_C, L_R_C);
+			L_R_C += R_C;
+			gotoxy(8, 3); cout << L_R_C;
+			R_C = 0;
+			NRun++;
+			gotoxy(8, 4); cout << NRun;
+			gotoxy(0, 28); system("pause");
+		}
 		// тут будет супер странная и неудобная конструкция с "if", но помоему, без неё никак
 		//когда 2 и больше Run уже в стеке - проверяем их на адекватность ( X>Y ; Y>Z; X>Y+Z - иначе слияние Y с наименьшим из них)
-		if (LengthStack(Run) == 2 && Run->count <= Run->tail->count) 
+		if (LengthStack(Run) > 1 && StackItem(Run, LengthStack(Run) - 2)->count <= StackItem(Run, LengthStack(Run)-1)->count)
 		{
 			Helper Z, Y;
 			Z = Pop(Run); // создаём доп переменнные типа HElPER для удобного перемещения в функцию
@@ -307,14 +331,15 @@ int main()
 			Y = Pop(Run);
 			Arr = MergeSort(Arr, Y, Z); // совмещаем их
 			Draww_Arr(Arr, Y.pointer, Y.count + Z.count);
-			Push(Run, Y.pointer + Z.pointer, Y.pointer);
+			Push(Run, Y.count + Z.count, Y.pointer);
 		}
-		else // иначе или соединяем их, или у нас остался 1 элемент стека( по факту это должен быть элемент обозначающий весь массив Arr)
+		if (Run->count == N) 
 		{
-
+			Stop = 1;
 		}
+
 	}
 	Draww_Arr(Arr, 0, N);
-	gotoxy(0, 27);
+	gotoxy(0, 25);
 	return 0;
 }
