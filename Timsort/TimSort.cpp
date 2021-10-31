@@ -195,17 +195,17 @@ Helper Pop(Stack* stack)
 	return X;
 };
 
-void Draww_Arr(int* Arr,int start,int end) 
+void Draww_Arr(int* Arr, int start, int end)
 {
 	for (int j = start; j < end; j++)
 	{
 		gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << "  ";
 	}
-	for (int j = start; j < end ; j++)
+	for (int j = start; j < end; j++)
 	{
 		gotoxy((25 + 3 * (j % 20)), 15 + j / 20); cout << Arr[j];
 	}
-}
+};
 
 // выводит адрес конкретного элемента стека
 Stack* GetStackItem(Stack* beg, unsigned index, bool errMsg = true)
@@ -222,16 +222,16 @@ Stack* GetStackItem(Stack* beg, unsigned index, bool errMsg = true)
 Stack* StackItem(Stack* beg, unsigned index, bool errMsg = true)
 {
 	//  Цикл заканчивается, когда 
-	while (beg && (index--)) 
+	while (beg && (index--))
 	{
 		beg = beg->tail; //доступ к памяти элемента
 	}
-	if (errMsg && !beg) 
+	if (errMsg && !beg)
 	{
 		cout << "Элемент отсутствует \n";
 	}
 	return beg;
-}
+};
 
 
 int main()
@@ -321,9 +321,16 @@ int main()
 			gotoxy(8, 4); cout << NRun;
 			gotoxy(0, 28); system("pause");
 		}
-		// тут будет супер странная и неудобная конструкция с "if", но помоему, без неё никак
-		//когда 2 и больше Run уже в стеке - проверяем их на адекватность ( X>Y ; Y>Z; X>Y+Z - иначе слияние Y с наименьшим из них)
-		if (LengthStack(Run) > 1 && StackItem(Run, LengthStack(Run) - 2)->count <= StackItem(Run, LengthStack(Run)-1)->count)
+		/* Тут будет супер странная и неудобная конструкция с "if" :
+		* Вы, наверное, в шоке.... Я тоже, это не круто, но так надо)
+		* первая строка до || обозначает что последний элемент стека должен быть меньше предыдущего, всё что идйт дальше - 
+		* банальная проверка на случай если самый последний элемент стека вдруг оказался меньше чем его предыдущий
+		* Например, будут элементы X,Y,Z,W, и W - меньше чем Z. Тогда X и Y совместятся,
+		* а для Z и W пришлось бы писать еще один if с абсолютно такими же командами (если удалить всё что идёт после || в 331 строке - программа зависает на случае, где N = 150)
+		*/
+		if (LengthStack(Run) > 1 && ((StackItem(Run, LengthStack(Run) - 2)->count <= StackItem(Run, LengthStack(Run)-1)->count)||
+			((StackItem(Run, LengthStack(Run) - 2)->count > StackItem(Run, LengthStack(Run) - 1)->count) && 
+				(StackItem(Run, LengthStack(Run) - 1)->pointer + StackItem(Run, LengthStack(Run) - 1)->count) == N)))
 		{
 			Helper Z, Y;
 			Z = Pop(Run); // создаём доп переменнные типа HElPER для удобного перемещения в функцию
@@ -341,5 +348,6 @@ int main()
 	}
 	Draww_Arr(Arr, 0, N);
 	gotoxy(0, 25);
+	system("pause");
 	return 0;
 }
