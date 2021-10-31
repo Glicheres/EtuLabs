@@ -50,18 +50,56 @@ struct Helper
 // ну ради проверки чиста
 int* MergeSort(int* Arr, Helper First, Helper Second)
 {
-	for (int i = 0; i < Second.count; i++)
+	/*cout << "Merge go";
+	system("pause");*/
+	int* H_Arr = new int[Second.count];
+	// создаём доп массив с 2м "хэлпером" ----------------  изменить !
+	for (int i = Second.pointer, j = 0; i < Second.pointer + Second.count; i++, j++)
 	{
-		Arr[i + Second.pointer] = 0;
+		H_Arr[j] = Arr[i];
 	}
-	for (int i = 0; i < First.count; i++)
+	/*cout << "Доп массив создан";
+	system("pause");*/
+	// тут была вспомогательная переменная k, и была она bool, получалась bool k (да, да, булка)
+	// но я придумал решение без неё... Предлагаю оставить этот коментарий в память о булке!
+	int i = First.pointer; // начинаем с F.p, заканчиваем F.p + F.c
+	int j = 0; // тут j c 0, до S.c
+	while (i < First.count + First.pointer + Second.count && j < Second.count)
 	{
-		Arr[i + First.pointer] = 0;
+		if (H_Arr[j] < Arr[i])
+		{
+			for (int k = First.pointer + First.count + Second.count; k >= i; k--)
+			{
+				Arr[k + 1] = Arr[k];
+			}
+			Arr[i] = H_Arr[j];
+			//cout << "j++ : ";
+			j++;
+		}
+		else
+		{
+			//cout << "i++ : ";
+			i++;
+		}
+		//cout << "i = " << i << " Arr[i] = " << Arr[i] << " j = " << j << " H_Arr[j] = " << H_Arr[j] << "\n";
+	}
+	//system("pause");
+	if (j < Second.count)
+	{
+		int dl = Second.count - j;
+		//gotoxy(0, 15); cout << dl;
+		i = i - dl;
+		while (dl != 0)
+		{
+			Arr[i] = H_Arr[j];
+			i++;
+			j++;
+			dl--;
+			//cout << "i = " << i << " Arr[i] = " << Arr[i] << " j = " << j << " H_Arr[j] = " << H_Arr[j] << "\n";
+		}
 	}
 	return Arr;
 };
-
-
 
 // Структура стека для хранения информации о Run
 struct Stack
@@ -259,7 +297,6 @@ int main()
 		gotoxy(8, 4); cout << NRun;
 		gotoxy(0, 28); system("pause");
 
-
 		// тут будет супер странная и неудобная конструкция с "if", но помоему, без неё никак
 		//когда 2 и больше Run уже в стеке - проверяем их на адекватность ( X>Y ; Y>Z; X>Y+Z - иначе слияние Y с наименьшим из них)
 		if (LengthStack(Run) == 2 && Run->count <= Run->tail->count) 
@@ -268,34 +305,16 @@ int main()
 			Z = Pop(Run); // создаём доп переменнные типа HElPER для удобного перемещения в функцию
 			cout << "\n";
 			Y = Pop(Run);
-			Arr = MergeSort(Arr, Z, Y); // совмещаем их
+			Arr = MergeSort(Arr, Y, Z); // совмещаем их
 			Draww_Arr(Arr, Y.pointer, Y.count + Z.count);
+			Push(Run, Y.pointer + Z.pointer, Y.pointer);
 		}
 		else // иначе или соединяем их, или у нас остался 1 элемент стека( по факту это должен быть элемент обозначающий весь массив Arr)
 		{
-			if (LengthStack(Run) > 2)
-			{
-				int GLOPI = 0; // General Lenght OF Previus Items - общая длинна предыдущих Run 
-				for (int k = LengthStack(Run); k>0; k--)
-				{
-					Stack* Item = GetStackItem(Run, k); // проверяем каждый элемент уже созданного стека так, чтобы: X>Y ; Y>Z; X>Y+Z, где X - первый добавленный элемент
-					if (Item->count > GLOPI) 
-					{
-						GLOPI += Item->count;
-					}
-					else  // иначе сливаем 2 полседних элемента друг с другом 
-					{
-						Helper X = Pop(Run); // создаём доп переменнные типа HElPER для удобного перемещения в функцию
-						Helper Y = Pop(Run);
-						Arr = MergeSort(Arr, Y, X); // совмещаем их
-						Push(Run, Y.count + X.count, Y.pointer);
-						Draww_Arr(Arr, Y.pointer, Y.count + X.count);
-						break;
-					}
-				}
-			}
+
 		}
 	}
+	Draww_Arr(Arr, 0, N);
 	gotoxy(0, 27);
 	return 0;
 }
