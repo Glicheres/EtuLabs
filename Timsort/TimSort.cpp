@@ -54,7 +54,7 @@ int* MergeSort(int* Arr, Helper First, Helper Second)
 	system("pause");*/
 	int* H_Arr = new int[Second.count];
 	// создаём доп массив с 2м "хэлпером" ----------------  изменить !
-	for (int i = Second.pointer, j = 0; i < Second.pointer + Second.count; i++, j++)
+	for (int i = Second.pointer , j = 0; i < Second.pointer + Second.count; i++, j++)
 	{
 		H_Arr[j] = Arr[i];
 	}
@@ -64,27 +64,27 @@ int* MergeSort(int* Arr, Helper First, Helper Second)
 	// но я придумал решение без неё... Предлагаю оставить этот коментарий в память о булке!
 	int i = First.pointer; // начинаем с F.p, заканчиваем F.p + F.c
 	int j = 0; // тут j c 0, до S.c
-	while (i < First.count + First.pointer + Second.count && j < Second.count)
+	while (i < First.count + First.pointer + Second.count  && j < Second.count )
 	{
 		if (H_Arr[j] < Arr[i])
 		{
-			for (int k = First.pointer + First.count + Second.count; k >= i; k--)
+			for (int k = (First.pointer + First.count + Second.count-1 ); k >= i; k--)
 			{
-				Arr[k + 1] = Arr[k];
+				Arr[k+1] = Arr[k]; // next item = item
 			}
+			//cout << "Arr[i] до = "<< Arr[i]<<"\n";
 			Arr[i] = H_Arr[j];
-			//cout << "j++ : ";
+			//cout << "j++ :\t";
 			j++;
 		}
 		else
 		{
-			//cout << "i++ : ";
+			//cout << "i++ :\t";
 			i++;
 		}
-		//cout << "i = " << i << " Arr[i] = " << Arr[i] << " j = " << j << " H_Arr[j] = " << H_Arr[j] << "\n";
+		//cout << "i = " << i << " Arr[i] = " << Arr[i] << "\tj = " << j << " H_Arr[j] = " << H_Arr[j] << "\n";
 	}
-	//system("pause");
-	if (j < Second.count)
+	if (j < Second.count )
 	{
 		int dl = Second.count - j;
 		//gotoxy(0, 15); cout << dl;
@@ -95,7 +95,7 @@ int* MergeSort(int* Arr, Helper First, Helper Second)
 			i++;
 			j++;
 			dl--;
-			//cout << "i = " << i << " Arr[i] = " << Arr[i] << " j = " << j << " H_Arr[j] = " << H_Arr[j] << "\n";
+			//cout << "i = " << i << " Arr[i] = " << Arr[i] << "\tj = " << j << " H_Arr[j] = " << H_Arr[j] << "\n";
 		}
 	}
 	return Arr;
@@ -159,6 +159,7 @@ void DrawStack(Stack* stack)
 	int i = 0;
 	while (stack)
 	{
+
 		cout << "Номер Элемента :" << i << "\t Начало с : " << stack->pointer << "\tДлинна:" << stack->count << "  Адрес:" << stack << "   Адрес следующего:" << stack->tail << "\n";
 		stack = stack->tail;
 		i++;
@@ -255,8 +256,8 @@ int main()
 	{
 		swap(Arr[i], Arr[rand() % (i - N)]); // как бы меняем i элемент на один из рандомного списка 
 	}
-	// Для проверки правильнх выделений у Run (проверял для массива в 160 элементов)
-	// кусочки интерфейса ьыъ
+
+	// кусочки интерфейса, ьыъ
 	int minrun = GetMinrun(N); // от 32 до 65  ( какие то волшебные математические манипуляции - разобраться бы в них еще )
 	gotoxy(0, 0); cout << "Min_Run = " << minrun;
 	gotoxy(0, 1); cout << "I = ";
@@ -280,7 +281,7 @@ int main()
 	int L_R_C = 0;
 	// номер run
 	int NRun = 0;
-	// останавливает цикл когда остаётся один Run 
+	// останавливает цикл когда остаётся один Run (ему свойственно иметь размер = N)
 	bool Stop = 0;
 
 	while (i < N || Stop == 0)
@@ -328,8 +329,8 @@ int main()
 		* Например, будут элементы X,Y,Z,W, и W - меньше чем Z. Тогда X и Y совместятся,
 		* а для Z и W пришлось бы писать еще один if с абсолютно такими же командами (если удалить всё что идёт после || в 331 строке - программа зависает на случае, где N = 150)
 		*/
-		if (LengthStack(Run) > 1 && ((StackItem(Run, LengthStack(Run) - 2)->count <= StackItem(Run, LengthStack(Run)-1)->count)||
-			((StackItem(Run, LengthStack(Run) - 2)->count > StackItem(Run, LengthStack(Run) - 1)->count) && 
+		if (LengthStack(Run) > 1 && ((StackItem(Run, LengthStack(Run) - 2)->count <= StackItem(Run, LengthStack(Run)-1)->count) ||
+			((StackItem(Run, LengthStack(Run) - 2)->count > StackItem(Run, LengthStack(Run) - 1)->count) &&
 				(StackItem(Run, LengthStack(Run) - 1)->pointer + StackItem(Run, LengthStack(Run) - 1)->count) == N)))
 		{
 			Helper Z, Y;
@@ -337,17 +338,19 @@ int main()
 			cout << "\n";
 			Y = Pop(Run);
 			Arr = MergeSort(Arr, Y, Z); // совмещаем их
-			Draww_Arr(Arr, Y.pointer, Y.count + Z.count);
+			if (i != N) { Draww_Arr(Arr, 0, i); } // help? i need somebody, help
+			else 
+			{
+				Draww_Arr(Arr, 0, N);
+			}
 			Push(Run, Y.count + Z.count, Y.pointer);
+			//gotoxy(0, 20); DrawStack(Run);
 		}
-		if (Run->count == N) 
+		if (Run->count == N)
 		{
 			Stop = 1;
 		}
-
 	}
-	Draww_Arr(Arr, 0, N);
-	gotoxy(0, 25);
-	system("pause");
+	cout << "\n"; system("pause");
 	return 0;
 }
