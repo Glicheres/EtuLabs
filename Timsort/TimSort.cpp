@@ -64,6 +64,7 @@ int* MergeSort(int* Arr, Helper First, Helper Second)
 	// но я придумал решение без неё... Предлагаю оставить этот коментарий в память о булке!
 	int i = First.pointer; // начинаем с F.p, заканчиваем F.p + F.c
 	int j = 0; // тут j c 0, до S.c
+	int Sumi = 0; // сумма увеличений для галопа (когда > 7, активирует спиды)
 	while (i < First.count + First.pointer + Second.count  && j < Second.count )
 	{
 		if (H_Arr[j] < Arr[i])
@@ -72,17 +73,40 @@ int* MergeSort(int* Arr, Helper First, Helper Second)
 			{
 				Arr[k+1] = Arr[k]; // next item = item
 			}
-			//cout << "Arr[i] до = "<< Arr[i]<<"\n";
 			Arr[i] = H_Arr[j];
 			//cout << "j++ :\t";
 			j++;
+			// когда нашли элемент подходящий, sumi = 0, т.к.... ну куда нам скакать то ?
+			Sumi = 0;
 		}
 		else
 		{
-			//cout << "i++ :\t";
-			i++;
+			//  ГАЛОП
+			if (j == 0) 
+			{
+				Sumi++;
+			}
+			if (Sumi < 7)
+			{
+				i++; // обычное увеличение стало частью галопа )
+			}
+			else 
+			{
+				int m = i;
+				while (H_Arr[j] > Arr[m])
+				{
+					m = m + pow(2, (Sumi - 7)); // m + 2^0 = m + 1, m + 2^1 = m + 2, m + 2^2 = m + 4, m + 2^3 = m + 8 и.т.д
+					Sumi++;
+				}
+				while (H_Arr[j] < Arr[m])
+				{
+					m--;
+				}
+				i = m;
+				Sumi = 0;
+			}
 		}
-		//cout << "i = " << i << " Arr[i] = " << Arr[i] << "\tj = " << j << " H_Arr[j] = " << H_Arr[j] << "\n";
+		//cout << "i = " << i << " Arr[i] = " << Arr[i] << "\tj = " << j << " H_Arr[j] = " << H_Arr[j] << "\t" << Sumi<<"\n"; // проверка
 	}
 	if (j < Second.count )
 	{
@@ -95,7 +119,7 @@ int* MergeSort(int* Arr, Helper First, Helper Second)
 			i++;
 			j++;
 			dl--;
-			//cout << "i = " << i << " Arr[i] = " << Arr[i] << "\tj = " << j << " H_Arr[j] = " << H_Arr[j] << "\n";
+			//cout << "i = " << i << " Arr[i] = " << Arr[i] << "\tj = " << j << " H_Arr[j] = " << H_Arr[j] << "\n"; // проверка
 		}
 	}
 	return Arr;
@@ -257,6 +281,7 @@ int main()
 		swap(Arr[i], Arr[rand() % (i - N)]); // как бы меняем i элемент на один из рандомного списка 
 	}
 
+
 	// кусочки интерфейса, ьыъ
 	int minrun = GetMinrun(N); // от 32 до 65  ( какие то волшебные математические манипуляции - разобраться бы в них еще )
 	gotoxy(0, 0); cout << "Min_Run = " << minrun;
@@ -351,6 +376,6 @@ int main()
 			Stop = 1;
 		}
 	}
-	cout << "\n"; system("pause");
+	gotoxy(0, 28); system("pause");
 	return 0;
 }
