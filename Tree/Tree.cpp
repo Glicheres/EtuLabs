@@ -275,7 +275,7 @@ int main()
 				Link->change(Link, zf, z, zz);
 				if (!z) 
 				{
-					cout << "Зменили! ";
+					cout << "Зменили";
 				}
 				else 
 				{
